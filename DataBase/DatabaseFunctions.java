@@ -142,22 +142,23 @@ public class DatabaseFunctions {
 
     }
 
-    public void searchEmployeeFromEmployeeID(int empId){
+    public Employee searchEmployeeFromEmployeeID(int empId){
         connectDb();
+        Employee employee=null;
         String query = "SELECT * from EMPLOYEE where id=?";
         PreparedStatement preparedStatement=null;
+        ResultSet resultSet=null;
         try{
           preparedStatement = con.prepareStatement(query);
           preparedStatement.setInt(1,empId);
-          ResultSet resultSet = preparedStatement.executeQuery();
+          resultSet = preparedStatement.executeQuery();
           if(!resultSet.isBeforeFirst()){
               System.out.println("###################################################");
               System.out.println("  No employee found with id - "+empId);
               System.out.println("####################################################");
-              return;
+              return null;
           }
-          retrieveResultSet(resultSet);
-
+            employee=retrieveResultSet(resultSet);
         }
         catch(SQLException e){
                 logger.error("Unable to execute select statement {}",query,e);
@@ -166,26 +167,27 @@ public class DatabaseFunctions {
         finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
-
+        return employee;
     }
 
-    public void searchEmployeeFromEmployeeName(String firstName, String lastName){
+    public Employee searchEmployeeFromEmployeeName(String firstName, String lastName){
         connectDb();
         String query = "SELECT * from EMPLOYEE where firstName=? and lastName=?";
         PreparedStatement preparedStatement=null;
+        ResultSet resultSet=null;
+        Employee employee=null;
         try{
             preparedStatement = con.prepareStatement(query);
             preparedStatement.setString(1,firstName);
             preparedStatement.setString(2,lastName);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if(!resultSet.isBeforeFirst()){
                 System.out.println("###########################################################");
                 System.out.println("  No employee found with name - "+firstName + " "+ lastName);
                 System.out.println("###########################################################");
-                return;
+                return null;
             }
-            retrieveResultSet(resultSet);
-
+            employee=retrieveResultSet(resultSet);
         }
         catch(SQLException e){
             logger.error("Unable to execute select statement {}",query,e);
@@ -194,28 +196,24 @@ public class DatabaseFunctions {
         finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
-
+        return employee;
     }
 
-    public void retrieveResultSet(ResultSet resultSet){
-
+    public Employee retrieveResultSet(ResultSet resultSet){
+       Employee employee = new Employee();
         try{
             while(resultSet.next()){
-                int id = resultSet.getInt("id");
-                String firstName = resultSet.getString("firstName");
-                String lastName = resultSet.getString("lastName");
-                String name= firstName+" "+lastName;
-                int age = resultSet.getInt("age");
-                String position = resultSet.getString("position");
-                double Salary = resultSet.getDouble("salary");
-                System.out.println("################################################");
-                System.out.println("   Employee Details");
-                System.out.println("   -------------------");
-                System.out.println("   Id      -> "+ id +"\n   Name    -> "+name+"\n   age     -> "+age + "\n   position-> "+position+ "\n   Salary -> "+Salary);
-                System.out.println("################################################\n");
+                employee.setId(resultSet.getInt("id"));
+                employee.setFirstName(resultSet.getString("firstName"));
+                employee.setLastName(resultSet.getString("lastName"));
+                employee.setAge(resultSet.getInt("age"));
+                employee.setPosition(resultSet.getString("position"));
+                employee.setSalary(resultSet.getDouble("salary"));
+                System.out.println(employee);
             }
         }catch(SQLException e){
             logger.error("Unable to retrieve info from ResultSet",e);
         }
+        return employee;
     }
 }

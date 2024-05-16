@@ -2,8 +2,6 @@ package EmployeeManagement;
 
 import DataBase.DatabaseFunctions;
 
-import java.sql.SQLOutput;
-
 public class Employee {
 
     private String firstName;
@@ -11,6 +9,8 @@ public class Employee {
     private int age;
     private String position;
     private Double salary;
+
+    private int id;
 
     private final DatabaseFunctions databaseFunctions = new DatabaseFunctions();
 
@@ -27,10 +27,10 @@ public class Employee {
     }
 
 
-
+    /**
+    This constructor is being used only for retrieving the Employee object from DB
+     **/
     public Employee(){
-        employeeCount++;
-        createEmployeeTable(this);
     }
 
     public String getFirstName() {
@@ -110,5 +110,30 @@ public class Employee {
         String saveEmployeeQuery="INSERT INTO EMPLOYEE (FIRSTNAME,LASTNAME,AGE,POSITION,SALARY) VALUES (?,?,?,?,?)";
         databaseFunctions.saveEmployeePreparedStatementDb(saveEmployeeQuery,employee);
 
+    }
+
+    public void setId(int id) {
+        this.id=id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getEmployeeFullName(){
+        return this.getFirstName()+" "+this.getLastName();
+    }
+
+    public String toString(){
+        String output="################################################\n   Employee Details\n   -------------------\n   ";
+        output+="Id      -> "+this.getId()+"\n   Name    -> "+this.getEmployeeFullName();
+        output+="\n   age     -> "+this.getAge()+"\n   position-> "+this.getPosition()+ "\n   Salary -> "+this.getSalary()+"\n";
+        output+="################################################\n";
+//        System.out.println("################################################");
+//        System.out.println("   Employee Details");
+//        System.out.println("   -------------------");
+//        System.out.println("   Id      -> "+ id +"\n   Name    -> "+name+"\n   age     -> "+age + "\n   position-> "+position+ "\n   Salary -> "+Salary);
+//        System.out.println("################################################\n");
+        return output;
     }
 }
