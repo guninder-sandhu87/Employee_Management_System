@@ -2,6 +2,7 @@ package EmployeeManagement;
 
 import DataBase.DatabaseFunctions;
 
+import java.sql.ResultSet;
 import java.util.Scanner;
 
 public class Driver {
@@ -52,75 +53,52 @@ public class Driver {
 
     private void modifyEmployeeDetails(Scanner scan) {
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-        viewEmployeeDetails(scan);
-        System.out.println("Choose the id of the employee you wanna modify");
-        int modifyId=scan.nextInt();
-        scan.nextLine();
-        System.out.println("Enter the first name of employee");
-        String firstName = scan.nextLine();
-        System.out.println("Enter the last name of employee");
-        String lastName = scan.nextLine();
-        int age = validateAge(scan);
-        scan.nextLine();
-        System.out.println("Enter the position");
-        String position = scan.nextLine();
-        System.out.println("Enter the salary");
-        double Salary = scan.nextDouble();
-        String query = "UPDATE EMPLOYEE SET firstName=?,lastName=?,age=?,position=?,Salary=? where id=?";
-        databaseFunctions.modifyEmployeePreparedStatementDb(query,modifyId,firstName,lastName,age,position,Salary);
+        Employee employee = viewEmployeeDetails(scan);
+        if (employee != null) {
+            System.out.println("Choose the id of the employee you wanna modify");
+            int modifyId = scan.nextInt();
+            scan.nextLine();
+            boolean done = false;
+            do {
+                System.out.println("What will you like to modify?");
+                System.out.println("1) First Name\n2) Last Name\n3)age\n4)position\n5)Salary\n6)Exit this submenu/ if you have chosen all the changes then press 6");
+                int choice = scan.nextInt();
+                scan.nextLine();
+                switch (choice) {
+                    case 1:
+                        System.out.println("Enter the first name");
+                        employee.setFirstName(scan.nextLine());
+                        break;
+                    case 2:
+                        System.out.println("Enter the last name");
+                        employee.setLastName(scan.nextLine());
+                        break;
+                    case 3:
+                        System.out.println("Enter the age");
+                        employee.setAge(scan.nextInt());
+                        scan.nextLine();
+                        break;
+                    case 4:
+                        System.out.println("Enter the position");
+                        employee.setPosition(scan.nextLine());
+                        break;
+                    case 5:
+                        System.out.println("Enter the Salary");
+                        employee.setSalary(scan.nextDouble());
+                        break;
+                    case 6:
+                        done = true;
+                        break;
+                    default:
+                        System.out.println("invalid");
+                }
 
-//        String firstName,lastName,position="";
-//        int age=-1;
-//        Double salary=-1.0;
-//
-//        String query="UPDATE EMPLOYEE SET ";
-//        scan.nextLine();
-//        System.out.println("What will you like to modify?");
-//        System.out.println("1) First Name\n2) Last Name\n3)age\n4)position\n5)Salary");
-//        boolean done = false;
-//        while(!done){
-//            int choice = scan.nextInt();
-//            scan.nextLine();
-//            switch(choice) {
-//                case 1:
-//                    System.out.println("Enter the first name");
-//                    firstName = scan.nextLine();
-//                    query += "firstName=?";
-//                    break;
-//                case 2:
-//                    System.out.println("Enter the last name");
-//                    lastName = scan.nextLine();
-//                    query += "lastName=?";
-//                    break;
-//                case 3:
-//                    System.out.println("Enter the age");
-//                    age = scan.nextInt();
-//                    scan.nextLine();
-//                    query += "age=?";
-//                    break;
-//                case 4:
-//                    System.out.println("Enter the position");
-//                    position = scan.nextLine();
-//                    query += "position=?";
-//                    break;
-//                case 5:
-//                    System.out.println("Enter the Salary");
-//                    salary = scan.nextDouble();
-//                    query += "salary=?";
-//                    break;
-//                case 6:
-//                    done = true;
-//                    break;
-//                default:
-//                    System.out.println("invalid");
-//            }
-//            System.out.println("Query is "+ query);
-//
-//
-//
-//            }
+            } while (!done);
+
+            String query = "UPDATE EMPLOYEE SET firstName=?,lastName=?,age=?,position=?,Salary=? where id=?";
+            databaseFunctions.modifyEmployeePreparedStatementDb(query, modifyId, employee.getFirstName(), employee.getLastName(), employee.getAge(), employee.getPosition(), employee.getSalary());
         }
-
+    }
 
 
     private void takeNewEmployeeDetails(Scanner scan) {
@@ -152,7 +130,8 @@ public class Driver {
         }
     }
 
-    private void viewEmployeeDetails(Scanner scan) {
+    private Employee viewEmployeeDetails(Scanner scan) {
+        Employee employee = null;
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
         System.out.println("1) By employee id");
         System.out.println("2) By employee name");
@@ -163,19 +142,20 @@ public class Driver {
                 System.out.println("Enter the Employee Id");
                 int empId = scan.nextInt();
                 scan.nextLine();
-                databaseFunctions.searchEmployeeFromEmployeeID(empId);
+                employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
             }
             case 2 -> {
                 System.out.println("Enter the Employee first Name");
                 String firstName = scan.nextLine();
                 System.out.println("Enter the last Name");
                 String lastName = scan.nextLine();
-                databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
+                employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
             }
             default -> {
                 System.out.println("invalid choice");
             }
         }
+        return employee;
     }
 
 
