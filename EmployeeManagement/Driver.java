@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Driver {
+    private final DatabaseFunctions databaseFunctions = new DatabaseFunctions();
 
 
     public static void main(String[] args) {
 
         Driver driver = new Driver();
         Scanner scan = new Scanner(System.in);
+
         int choice;
 
         do {
@@ -54,7 +56,7 @@ public class Driver {
         System.out.println("Choose:\n1)If you know the id of the Employee.\n2)If you would like to search for employee using name");
         int subChoice = scan.nextInt();
         scan.nextLine();
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+
         Employee employee=null;
 
         switch (subChoice) {
@@ -63,7 +65,13 @@ public class Driver {
                 int empId = scan.nextInt();
                 scan.nextLine();
                 employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
-                System.out.println(employee);
+                if(employee==null){
+                    System.out.println("###################################################");
+                    System.out.println("  No employee found  with id "+empId);
+                    System.out.println("####################################################");
+                }else {
+                    System.out.println(employee);
+                }
                 if (modify) {
                     modifyEmployeeDetails(scan,employee);
                 } else if (delete) {
@@ -75,19 +83,23 @@ public class Driver {
                 ArrayList<Employee> employeeList = viewEmployeeDetailsUsingName(scan);
                 if (!onlyView) {
                     if (!employeeList.isEmpty()) {
-                        System.out.println("Choose the id of the employee");
-                        int modifyId = scan.nextInt();
-                        scan.nextLine();
-                        for (Employee emp:employeeList ) {
-                            if(emp.getId()==modifyId){
-                                employee=emp;
+                        if(employeeList.size()>1) {
+                            System.out.println("Choose the id of the employee a there are more than one employee with same name");
+                            int modifyId = scan.nextInt();
+                            scan.nextLine();
+                            for (Employee emp : employeeList) {
+                                if (emp.getId() == modifyId) {
+                                    employee = emp;
+                                }
                             }
+                        }else{
+                            employee=employeeList.get(0);
                         }
 
                         if (modify) {
                             modifyEmployeeDetails(scan,employee);
                         } else if (delete) {
-                            deleteEmployeeDetails( modifyId);
+                            deleteEmployeeDetails( employee.getId());
 
                         }
                     }
@@ -99,9 +111,6 @@ public class Driver {
     }
 
     private void modifyEmployeeDetails(Scanner scan, Employee employee) {
-
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-
         boolean done = false;
         do {
             System.out.println("What will you like to modify?");
@@ -144,7 +153,6 @@ public class Driver {
     }
 
     private void deleteEmployeeDetails( int modifyId) {
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
         System.out.println("Going to delete employee with employee id" + modifyId);
         String deleteQuery = "DELETE FROM EMPLOYEE where id=?";
         databaseFunctions.deleteEmployeeWithId(deleteQuery, modifyId);
@@ -182,24 +190,17 @@ public class Driver {
 
     private ArrayList<Employee> viewEmployeeDetailsUsingName(Scanner scan) {
         ArrayList<Employee> employee = new ArrayList<>();
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
         System.out.println("Enter the Employee first Name");
         String firstName = scan.nextLine();
         System.out.println("Enter the last Name");
         String lastName = scan.nextLine();
         employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
         printEmployee(employee);
-
         return employee;
     }
 
     private void printEmployee(ArrayList<Employee> employee) {
-        if (employee.isEmpty()) {
-            System.out.println("###################################################");
-            System.out.println("  No employee found ");
-            System.out.println("####################################################");
-        } else {
+           if(employee!=null )
             employee.forEach(System.out::println);
-        }
     }
 }
