@@ -143,7 +143,7 @@ public class DatabaseFunctions {
 
     }
 
-    public ArrayList<Employee> searchEmployeeFromEmployeeID(int empId){
+    public Employee searchEmployeeFromEmployeeID(int empId){
         connectDb();
         ArrayList<Employee> employee=new ArrayList<>();
         String query = "SELECT * from EMPLOYEE where id=?";
@@ -166,7 +166,7 @@ public class DatabaseFunctions {
         finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
-        return employee;
+        return employee.get(0);
     }
 
     public ArrayList<Employee> searchEmployeeFromEmployeeName(String firstName, String lastName){
@@ -198,10 +198,28 @@ public class DatabaseFunctions {
         return employee;
     }
 
-    public ArrayList<Employee> retrieveResultSet(ResultSet resultSet, ArrayList<Employee> employeeList){
-       Employee employee = new Employee();
+    public void deleteEmployeeWithId(String deleteQuery,int employeeId){
+        connectDb();
+        PreparedStatement preparedStatement=null;
+        try {
+            preparedStatement = con.prepareStatement(deleteQuery);
+            preparedStatement.setInt(1,employeeId);
+            int deletedRows = preparedStatement.executeUpdate();
+          logger.info("Deleted {} row",deletedRows);
+
+        }catch(SQLException e){
+            logger.error("Unable to delete employee with id-{}",employeeId,e);
+        }
+        finally {
+            closePreparedStatementAndConnection(preparedStatement);
+        }
+    }
+
+    private ArrayList<Employee> retrieveResultSet(ResultSet resultSet, ArrayList<Employee> employeeList){
+
         try{
             while(resultSet.next()){
+                Employee employee = new Employee();
                 employee.setId(resultSet.getInt("id"));
                 employee.setFirstName(resultSet.getString("firstName"));
                 employee.setLastName(resultSet.getString("lastName"));
@@ -209,7 +227,6 @@ public class DatabaseFunctions {
                 employee.setPosition(resultSet.getString("position"));
                 employee.setSalary(resultSet.getDouble("salary"));
                 employeeList.add(employee);
-                System.out.println("added employee");
             }
         }catch(SQLException e){
             logger.error("Unable to retrieve info from ResultSet",e);
