@@ -2,7 +2,7 @@ package EmployeeManagement;
 
 import DataBase.DatabaseFunctions;
 
-import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Driver {
@@ -29,75 +29,125 @@ public class Driver {
                     break;
                 case 2:
                     System.out.println("How will you like to search the Employee");
-                    driver.viewEmployeeDetails(scan);
+                    driver.subMenu(scan, true, false, false);
                     break;
                 case 3:
                     System.out.println("Search the Employee whose details you want to modify");
-                    driver.modifyEmployeeDetails(scan);
+                    driver.subMenu(scan, false, true, false);
                     break;
                 case 4:
+                    System.out.println("Search the Employee whom you want to delete");
+                    driver.subMenu(scan, false, false, true);
                     break;
                 case 5:
                     System.out.println("Thanks for using .Bye");
                     break;
                 default:
                     System.out.println("Wrong choice");
-
-
             }
 
         } while (choice != 5);
-
-
     }
 
-    private void modifyEmployeeDetails(Scanner scan) {
+
+    private void subMenu(Scanner scan, boolean onlyView, boolean modify, boolean delete) {
+        System.out.println("Choose:\n1)If you know the id of the Employee.\n2)If you would like to search for employee using name");
+        int subChoice = scan.nextInt();
+        scan.nextLine();
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-        Employee employee = viewEmployeeDetails(scan);
-        if (employee != null) {
-            System.out.println("Choose the id of the employee you wanna modify");
-            int modifyId = scan.nextInt();
-            scan.nextLine();
-            boolean done = false;
-            do {
-                System.out.println("What will you like to modify?");
-                System.out.println("1) First Name\n2) Last Name\n3)age\n4)position\n5)Salary\n6)Exit this submenu/ if you have chosen all the changes then press 6");
-                int choice = scan.nextInt();
+        Employee employee=null;
+
+        switch (subChoice) {
+            case 1:
+                System.out.println("Enter the Employee Id");
+                int empId = scan.nextInt();
                 scan.nextLine();
-                switch (choice) {
-                    case 1:
-                        System.out.println("Enter the first name");
-                        employee.setFirstName(scan.nextLine());
-                        break;
-                    case 2:
-                        System.out.println("Enter the last name");
-                        employee.setLastName(scan.nextLine());
-                        break;
-                    case 3:
-                        System.out.println("Enter the age");
-                        employee.setAge(scan.nextInt());
-                        scan.nextLine();
-                        break;
-                    case 4:
-                        System.out.println("Enter the position");
-                        employee.setPosition(scan.nextLine());
-                        break;
-                    case 5:
-                        System.out.println("Enter the Salary");
-                        employee.setSalary(scan.nextDouble());
-                        break;
-                    case 6:
-                        done = true;
-                        break;
-                    default:
-                        System.out.println("invalid");
+                employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
+                System.out.println(employee);
+                if (modify) {
+                    modifyEmployeeDetails(scan,employee);
+                } else if (delete) {
+                    deleteEmployeeDetails( employee.getId());
+
                 }
+                break;
+            case 2:
+                ArrayList<Employee> employeeList = viewEmployeeDetailsUsingName(scan);
+                if (!onlyView) {
+                    if (!employeeList.isEmpty()) {
+                        System.out.println("Choose the id of the employee");
+                        int modifyId = scan.nextInt();
+                        scan.nextLine();
+                        for (Employee emp:employeeList ) {
+                            if(emp.getId()==modifyId){
+                                employee=emp;
+                            }
+                        }
 
-            } while (!done);
+                        if (modify) {
+                            modifyEmployeeDetails(scan,employee);
+                        } else if (delete) {
+                            deleteEmployeeDetails( modifyId);
 
-            String query = "UPDATE EMPLOYEE SET firstName=?,lastName=?,age=?,position=?,Salary=? where id=?";
-            databaseFunctions.modifyEmployeePreparedStatementDb(query, modifyId, employee.getFirstName(), employee.getLastName(), employee.getAge(), employee.getPosition(), employee.getSalary());
+                        }
+                    }
+                }
+                break;
+            default:
+                System.out.println("wrong choice in sub Menu");
         }
+    }
+
+    private void modifyEmployeeDetails(Scanner scan, Employee employee) {
+
+        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+
+        boolean done = false;
+        do {
+            System.out.println("What will you like to modify?");
+            System.out.println("1) First Name\n2) Last Name\n3)age\n4)position\n5)Salary\n6)Exit this submenu/ if you have chosen all the changes then press 6");
+            int choice = scan.nextInt();
+            scan.nextLine();
+            switch (choice) {
+                case 1:
+                    System.out.println("Enter the first name");
+                    employee.setFirstName(scan.nextLine());
+                    break;
+                case 2:
+                    System.out.println("Enter the last name");
+                    employee.setLastName(scan.nextLine());
+                    break;
+                case 3:
+                    System.out.println("Enter the age");
+                    employee.setAge(scan.nextInt());
+                    scan.nextLine();
+                    break;
+                case 4:
+                    System.out.println("Enter the position");
+                    employee.setPosition(scan.nextLine());
+                    break;
+                case 5:
+                    System.out.println("Enter the Salary");
+                    employee.setSalary(scan.nextDouble());
+                    break;
+                case 6:
+                    done = true;
+                    break;
+                default:
+                    System.out.println("invalid");
+            }
+
+        } while (!done);
+
+        String query = "UPDATE EMPLOYEE SET firstName=?,lastName=?,age=?,position=?,Salary=? where id=?";
+        databaseFunctions.modifyEmployeePreparedStatementDb(query, employee.getId(), employee.getFirstName(), employee.getLastName(), employee.getAge(), employee.getPosition(), employee.getSalary());
+    }
+
+    private void deleteEmployeeDetails( int modifyId) {
+        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+        System.out.println("Going to delete employee with employee id" + modifyId);
+        String deleteQuery = "DELETE FROM EMPLOYEE where id=?";
+        databaseFunctions.deleteEmployeeWithId(deleteQuery, modifyId);
     }
 
 
@@ -130,33 +180,26 @@ public class Driver {
         }
     }
 
-    private Employee viewEmployeeDetails(Scanner scan) {
-        Employee employee = null;
+    private ArrayList<Employee> viewEmployeeDetailsUsingName(Scanner scan) {
+        ArrayList<Employee> employee = new ArrayList<>();
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-        System.out.println("1) By employee id");
-        System.out.println("2) By employee name");
-        int userChoice = scan.nextInt();
-        scan.nextLine();
-        switch (userChoice) {
-            case 1 -> {
-                System.out.println("Enter the Employee Id");
-                int empId = scan.nextInt();
-                scan.nextLine();
-                employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
-            }
-            case 2 -> {
-                System.out.println("Enter the Employee first Name");
-                String firstName = scan.nextLine();
-                System.out.println("Enter the last Name");
-                String lastName = scan.nextLine();
-                employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
-            }
-            default -> {
-                System.out.println("invalid choice");
-            }
-        }
+        System.out.println("Enter the Employee first Name");
+        String firstName = scan.nextLine();
+        System.out.println("Enter the last Name");
+        String lastName = scan.nextLine();
+        employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
+        printEmployee(employee);
+
         return employee;
     }
 
-
+    private void printEmployee(ArrayList<Employee> employee) {
+        if (employee.isEmpty()) {
+            System.out.println("###################################################");
+            System.out.println("  No employee found ");
+            System.out.println("####################################################");
+        } else {
+            employee.forEach(System.out::println);
+        }
+    }
 }
