@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 
 
 import java.sql.*;
+import java.util.ArrayList;
 
 
 public class DatabaseFunctions {
@@ -142,9 +143,9 @@ public class DatabaseFunctions {
 
     }
 
-    public Employee searchEmployeeFromEmployeeID(int empId){
+    public ArrayList<Employee> searchEmployeeFromEmployeeID(int empId){
         connectDb();
-        Employee employee=null;
+        ArrayList<Employee> employee=new ArrayList<>();
         String query = "SELECT * from EMPLOYEE where id=?";
         PreparedStatement preparedStatement=null;
         ResultSet resultSet=null;
@@ -153,12 +154,10 @@ public class DatabaseFunctions {
           preparedStatement.setInt(1,empId);
           resultSet = preparedStatement.executeQuery();
           if(!resultSet.isBeforeFirst()){
-              System.out.println("###################################################");
-              System.out.println("  No employee found with id - "+empId);
-              System.out.println("####################################################");
+
               return null;
           }
-            employee=retrieveResultSet(resultSet);
+            retrieveResultSet(resultSet,employee);
         }
         catch(SQLException e){
                 logger.error("Unable to execute select statement {}",query,e);
@@ -170,12 +169,12 @@ public class DatabaseFunctions {
         return employee;
     }
 
-    public Employee searchEmployeeFromEmployeeName(String firstName, String lastName){
+    public ArrayList<Employee> searchEmployeeFromEmployeeName(String firstName, String lastName){
         connectDb();
+        ArrayList<Employee> employee=new ArrayList<>();
         String query = "SELECT * from EMPLOYEE where firstName=? and lastName=?";
         PreparedStatement preparedStatement=null;
         ResultSet resultSet=null;
-        Employee employee=null;
         try{
             preparedStatement = con.prepareStatement(query);
             preparedStatement.setString(1,firstName);
@@ -187,7 +186,7 @@ public class DatabaseFunctions {
                 System.out.println("###########################################################");
                 return null;
             }
-            employee=retrieveResultSet(resultSet);
+            retrieveResultSet(resultSet,employee);
         }
         catch(SQLException e){
             logger.error("Unable to execute select statement {}",query,e);
@@ -199,7 +198,7 @@ public class DatabaseFunctions {
         return employee;
     }
 
-    public Employee retrieveResultSet(ResultSet resultSet){
+    public ArrayList<Employee> retrieveResultSet(ResultSet resultSet, ArrayList<Employee> employeeList){
        Employee employee = new Employee();
         try{
             while(resultSet.next()){
@@ -209,11 +208,12 @@ public class DatabaseFunctions {
                 employee.setAge(resultSet.getInt("age"));
                 employee.setPosition(resultSet.getString("position"));
                 employee.setSalary(resultSet.getDouble("salary"));
-                System.out.println(employee);
+                employeeList.add(employee);
+                System.out.println("added employee");
             }
         }catch(SQLException e){
             logger.error("Unable to retrieve info from ResultSet",e);
         }
-        return employee;
+        return employeeList;
     }
 }

@@ -3,6 +3,7 @@ package EmployeeManagement;
 import DataBase.DatabaseFunctions;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Driver {
@@ -36,6 +37,8 @@ public class Driver {
                     driver.modifyEmployeeDetails(scan);
                     break;
                 case 4:
+                    System.out.println("Search the Employee whom you want to delete");
+                    driver.deleteEmployeeDetails(scan);
                     break;
                 case 5:
                     System.out.println("Thanks for using .Bye");
@@ -51,12 +54,23 @@ public class Driver {
 
     }
 
-    private void modifyEmployeeDetails(Scanner scan) {
+    private void deleteEmployeeDetails(Scanner scan) {
         DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-        Employee employee = viewEmployeeDetails(scan);
-        if (employee != null) {
+        ArrayList<Employee> employeeList = viewEmployeeDetails(scan);
+        if(!employeeList.isEmpty()){
             System.out.println("Choose the id of the employee you wanna modify");
             int modifyId = scan.nextInt();
+            scan.nextLine();
+        }
+    }
+
+    private void modifyEmployeeDetails(Scanner scan) {
+        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+        ArrayList<Employee> employeeList = viewEmployeeDetails(scan);
+        if (!employeeList.isEmpty()) {
+            System.out.println("Choose thee id of the employee you wanna modify");
+            int modifyId = scan.nextInt();
+            Employee employee=employeeList.get(modifyId-1);
             scan.nextLine();
             boolean done = false;
             do {
@@ -101,62 +115,73 @@ public class Driver {
     }
 
 
-    private void takeNewEmployeeDetails(Scanner scan) {
-        System.out.println("Enter the first name of employee");
-        String firstName = scan.nextLine();
-        System.out.println("Enter the last name of employee");
-        String lastName = scan.nextLine();
-        int age = validateAge(scan);
-        scan.nextLine();
-        System.out.println("Enter the position");
-        String position = scan.nextLine();
-        System.out.println("Enter the salary");
-        Double Salary = scan.nextDouble();
-        createEmployeeObject(firstName, lastName, age, position, Salary);
-    }
-
-    private void createEmployeeObject(String firstName, String lastName, int age, String position, Double salary) {
-        Employee employee = new Employee(firstName, lastName, age, position, salary);
-    }
-
-    private int validateAge(Scanner scan) {
-        System.out.println("Enter the age");
-        int age = scan.nextInt();
-        if (age >= 18 && age <= 65) {
-            return age;
-        } else {
-            System.out.println("invalid Age : age should be between 18 and 65");
-            return validateAge(scan);
+        private void takeNewEmployeeDetails (Scanner scan){
+            System.out.println("Enter the first name of employee");
+            String firstName = scan.nextLine();
+            System.out.println("Enter the last name of employee");
+            String lastName = scan.nextLine();
+            int age = validateAge(scan);
+            scan.nextLine();
+            System.out.println("Enter the position");
+            String position = scan.nextLine();
+            System.out.println("Enter the salary");
+            Double Salary = scan.nextDouble();
+            createEmployeeObject(firstName, lastName, age, position, Salary);
         }
-    }
 
-    private Employee viewEmployeeDetails(Scanner scan) {
-        Employee employee = null;
-        DatabaseFunctions databaseFunctions = new DatabaseFunctions();
-        System.out.println("1) By employee id");
-        System.out.println("2) By employee name");
-        int userChoice = scan.nextInt();
-        scan.nextLine();
-        switch (userChoice) {
-            case 1 -> {
-                System.out.println("Enter the Employee Id");
-                int empId = scan.nextInt();
-                scan.nextLine();
-                employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
-            }
-            case 2 -> {
-                System.out.println("Enter the Employee first Name");
-                String firstName = scan.nextLine();
-                System.out.println("Enter the last Name");
-                String lastName = scan.nextLine();
-                employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
-            }
-            default -> {
-                System.out.println("invalid choice");
+        private void createEmployeeObject (String firstName, String lastName,int age, String position, Double salary){
+            Employee employee = new Employee(firstName, lastName, age, position, salary);
+        }
+
+        private int validateAge (Scanner scan){
+            System.out.println("Enter the age");
+            int age = scan.nextInt();
+            if (age >= 18 && age <= 65) {
+                return age;
+            } else {
+                System.out.println("invalid Age : age should be between 18 and 65");
+                return validateAge(scan);
             }
         }
-        return employee;
+
+        private ArrayList<Employee> viewEmployeeDetails (Scanner scan){
+            ArrayList<Employee> employee = new ArrayList<>();
+            DatabaseFunctions databaseFunctions = new DatabaseFunctions();
+            System.out.println("1) By employee id");
+            System.out.println("2) By employee name");
+            int userChoice = scan.nextInt();
+            scan.nextLine();
+            switch (userChoice) {
+                case 1 -> {
+                    System.out.println("Enter the Employee Id");
+                    int empId = scan.nextInt();
+                    scan.nextLine();
+                    employee = databaseFunctions.searchEmployeeFromEmployeeID(empId);
+                    printEmployee(employee);
+
+                }
+                case 2 -> {
+                    System.out.println("Enter the Employee first Name");
+                    String firstName = scan.nextLine();
+                    System.out.println("Enter the last Name");
+                    String lastName = scan.nextLine();
+                    employee = databaseFunctions.searchEmployeeFromEmployeeName(firstName, lastName);
+                    printEmployee(employee);
+                }
+                default -> {
+                    System.out.println("invalid choice");
+                }
+            }
+            return employee;
+        }
+
+        private void printEmployee(ArrayList<Employee> employee){
+            if (employee.isEmpty()) {
+                System.out.println("###################################################");
+                System.out.println("  No employee found ");
+                System.out.println("####################################################");
+            } else {
+                employee.forEach(System.out::println);
+            }
+        }
     }
-
-
-}
