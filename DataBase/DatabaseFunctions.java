@@ -4,7 +4,6 @@ import EmployeeManagement.Employee;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -122,7 +121,7 @@ public class DatabaseFunctions {
 
     }
 
-    public void modifyEmployeePreparedStatementDb(String query,int id, String firstName, String lastName, int age, String position, double salary) {
+    public void modifyEmployeePreparedStatementDb(String query, int id, String firstName, String lastName, int age, String position, double salary) {
         connectDb();
         PreparedStatement preparedStatement = null;
         try {
@@ -131,8 +130,8 @@ public class DatabaseFunctions {
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, age);
             preparedStatement.setString(4, position);
-            preparedStatement.setDouble(5,salary);
-            preparedStatement.setInt(6,id);
+            preparedStatement.setDouble(5, salary);
+            preparedStatement.setInt(6, id);
             int rows = preparedStatement.executeUpdate();
             System.out.println("Updated " + rows + " row");
         } catch (SQLException e) {
@@ -143,82 +142,77 @@ public class DatabaseFunctions {
 
     }
 
-    public Employee searchEmployeeFromEmployeeID(int empId){
+    public Employee searchEmployeeFromEmployeeID(int empId) {
         connectDb();
-        ArrayList<Employee> employee=new ArrayList<>();
+        ArrayList<Employee> employee = new ArrayList<>();
         String query = "SELECT * from EMPLOYEE where id=?";
-        PreparedStatement preparedStatement=null;
-        ResultSet resultSet=null;
-        try{
-          preparedStatement = con.prepareStatement(query);
-          preparedStatement.setInt(1,empId);
-          resultSet = preparedStatement.executeQuery();
-          if(!resultSet.isBeforeFirst()){
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = con.prepareStatement(query);
+            preparedStatement.setInt(1, empId);
+            resultSet = preparedStatement.executeQuery();
+            if (!resultSet.isBeforeFirst()) {
 
-              return null;
-          }
-            retrieveResultSet(resultSet,employee);
-        }
-        catch(SQLException e){
-                logger.error("Unable to execute select statement {}",query,e);
+                return null;
+            }
+            retrieveResultSet(resultSet, employee);
+        } catch (SQLException e) {
+            logger.error("Unable to execute select statement {}", query, e);
 
-        }
-        finally {
+        } finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
         return employee.get(0);
     }
 
-    public ArrayList<Employee> searchEmployeeFromEmployeeName(String firstName, String lastName){
+    public ArrayList<Employee> searchEmployeeFromEmployeeName(String firstName, String lastName) {
         connectDb();
-        ArrayList<Employee> employee=new ArrayList<>();
+        ArrayList<Employee> employee = new ArrayList<>();
         String query = "SELECT * from EMPLOYEE where firstName=? and lastName=?";
-        PreparedStatement preparedStatement=null;
-        ResultSet resultSet=null;
-        try{
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
             preparedStatement = con.prepareStatement(query);
-            preparedStatement.setString(1,firstName);
-            preparedStatement.setString(2,lastName);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
             resultSet = preparedStatement.executeQuery();
-            if(!resultSet.isBeforeFirst()){
+            if (!resultSet.isBeforeFirst()) {
                 System.out.println("###########################################################");
-                System.out.println("  No employee found with name - "+firstName + " "+ lastName);
+                System.out.println("  No employee found with name - " + firstName + " " + lastName);
                 System.out.println("###########################################################");
                 return null;
             }
-            retrieveResultSet(resultSet,employee);
-        }
-        catch(SQLException e){
-            logger.error("Unable to execute select statement {}",query,e);
+            retrieveResultSet(resultSet, employee);
+        } catch (SQLException e) {
+            logger.error("Unable to execute select statement {}", query, e);
 
-        }
-        finally {
+        } finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
         return employee;
     }
 
-    public void deleteEmployeeWithId(String deleteQuery,int employeeId){
+    public void deleteEmployeeWithId(String deleteQuery, int employeeId) {
         connectDb();
-        PreparedStatement preparedStatement=null;
+        PreparedStatement preparedStatement = null;
         try {
             preparedStatement = con.prepareStatement(deleteQuery);
-            preparedStatement.setInt(1,employeeId);
+            preparedStatement.setInt(1, employeeId);
             int deletedRows = preparedStatement.executeUpdate();
-          logger.info("Deleted {} row",deletedRows);
+            logger.info("Deleted {} row", deletedRows);
 
-        }catch(SQLException e){
-            logger.error("Unable to delete employee with id-{}",employeeId,e);
-        }
-        finally {
+        } catch (SQLException e) {
+            logger.error("Unable to delete employee with id-{}", employeeId, e);
+        } finally {
             closePreparedStatementAndConnection(preparedStatement);
         }
     }
 
-    private ArrayList<Employee> retrieveResultSet(ResultSet resultSet, ArrayList<Employee> employeeList){
+    private ArrayList<Employee> retrieveResultSet(ResultSet resultSet, ArrayList<Employee> employeeList) {
 
-        try{
-            while(resultSet.next()){
+        try {
+            while (resultSet.next()) {
                 Employee employee = new Employee();
                 employee.setId(resultSet.getInt("id"));
                 employee.setFirstName(resultSet.getString("firstName"));
@@ -228,8 +222,8 @@ public class DatabaseFunctions {
                 employee.setSalary(resultSet.getDouble("salary"));
                 employeeList.add(employee);
             }
-        }catch(SQLException e){
-            logger.error("Unable to retrieve info from ResultSet",e);
+        } catch (SQLException e) {
+            logger.error("Unable to retrieve info from ResultSet", e);
         }
         return employeeList;
     }
